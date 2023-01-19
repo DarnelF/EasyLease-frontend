@@ -3,11 +3,10 @@ import Navbar from "./Navbar";
 import style from "../styles/ClientProfil.module.css";
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import client from "../reducers/client";
 import { useRouter } from "next/router";
 import { Modal } from "antd";
 import Header from "./Header";
+import styles from "../styles/Settings.module.css"
 Header;
 
 function ClientProfil() {
@@ -18,7 +17,6 @@ function ClientProfil() {
   const [errorModifModal, setErrorModifModal] = useState(false);
   const [successDeleteModal, setSuccesDeleteModal] = useState(false);
   const [errorDeleteModal, setErrorDeleteModal] = useState(false);
-  const [dataInterlocutor, setDataInterlocutor] = useState([]);
   const [name, setname] = useState("");
   const [clientBirth, setclientBirth] = useState("");
   const [address, setaddress] = useState("");
@@ -26,7 +24,9 @@ function ClientProfil() {
   const [chiffre, setchiffre] = useState("");
   const [interlocutor, setinterlocutor] = useState("");
   const [contrat, setContrat] = useState("");
-  const backend_adress = "http://localhost:3000";
+  const [handleBeforeDeleteModal, setHandleBeforeDeleteModal] = useState(false);
+
+  const backend_adress = "https://easylease-backend.vercel.app";
 
   const clientBirthDate = new Date(clientBirth);
   const clientBirthDateFormated = clientBirthDate.toLocaleDateString();
@@ -100,11 +100,12 @@ function ClientProfil() {
     })
       .then((res) => res.json())
       .then((data) => {
+        console.log("DATA FROM DELETE CLIENT", data.result);
         if (data.result) {
           setSuccesDeleteModal(true);
         } else {
           console.log("echec");
-          setErrorDeleteModal(false);
+          setErrorDeleteModal(true);
         }
       });
   };
@@ -122,6 +123,7 @@ function ClientProfil() {
     setSuccesModifModal(false);
     setaddDocModal(false);
   };
+
   console.log("inter", interlocutor);
 
   let interlocutorData;
@@ -170,7 +172,7 @@ function ClientProfil() {
                   </button>
                   <button
                     className={style.buttonModal}
-                    onClick={() => SupprimClient()}
+                    onClick={() =>  setHandleBeforeDeleteModal(true)}
                   >
                     Supprimer
                   </button>
@@ -179,21 +181,22 @@ function ClientProfil() {
               <div className={style.docsContainer}>
                 <h3>Documents joints : </h3>
                 {contratData}
-                <button
+                {/* <button
                   className={style.buttonModal}
                   onClick={() => handleCloseModal()}
                 >
                   Ajouter un document
-                </button>
+                </button> */}
               </div>
             </div>
-            <div className={style.ButtonContainer}></div>
+            {/* <div className={style.ButtonContainer}></div> */}
           </div>
         </div>
       </div>
-      <Modal onCancel={() => handleModal()} open={addDocModal} footer={null}>
+      <Modal className={style.modalUpdateClient} onCancel={() => handleModal()} open={addDocModal} footer={null}>
         <div>
           <div className="modal-modifier">
+            <p>Nom entreprise : </p>
             <input
               type="text"
               placeholder="Nom entreprise"
@@ -202,6 +205,7 @@ function ClientProfil() {
             />
           </div>
           <div className="modal-modifier">
+          <p>Ancienneté du client : </p>
             <input
               type="text"
               placeholder="ancienneté"
@@ -210,6 +214,7 @@ function ClientProfil() {
             />
           </div>
           <div className="modal-modifier">
+          <p>Adresse : </p>
             <input
               type="text"
               placeholder="addresse"
@@ -218,6 +223,7 @@ function ClientProfil() {
             />
           </div>
           <div className="modal-modifier">
+          <p>Nombre d'employés : </p>
             <input
               type="text"
               placeholder="nombre d'employés"
@@ -226,6 +232,7 @@ function ClientProfil() {
             />
           </div>
           <div className="modal-modifier">
+          <p>Chiffre d'affaires : </p>
             <input
               type="text"
               placeholder="CA"
@@ -256,7 +263,7 @@ function ClientProfil() {
         footer={null}
       >
         <p style={{ fontSize: 18, textAlign: "center" }}>
-          ✅ client modifié ! ✅
+          ✅ Client modifié ! ✅
         </p>
       </Modal>
       <Modal
@@ -265,7 +272,7 @@ function ClientProfil() {
         footer={null}
       >
         <p style={{ fontSize: 18, textAlign: "center" }}>
-          ❌ erreur client non modifié ! ❌
+          ❌ Erreur client non modifié ! ❌
         </p>
       </Modal>
       <Modal
@@ -274,18 +281,40 @@ function ClientProfil() {
         footer={null}
       >
         <p style={{ fontSize: 18, textAlign: "center" }}>
-          ✅ client supprimé ! ✅
+          ✅ Client supprimé ! ✅
         </p>
       </Modal>
       <Modal
-        onCancel={() => handleCloseModal()}
+        onCancel={() => setErrorDeleteModal(false)}
         open={errorDeleteModal}
         footer={null}
       >
         <p style={{ fontSize: 18, textAlign: "center" }}>
-          ❌ erreur client non suprimé ! ❌
+          ❌ Erreur client non suprimé car il dispose de contrat(s) ou de scenario(s) à son nom ! ❌
+        </p>
+        <p style={{ fontSize: 18, textAlign: "center" }}>
+          Veuillez les supprimer avant de réessayer. 
         </p>
       </Modal>
+      <Modal footer={null} open={handleBeforeDeleteModal} onCancel={() => setHandleBeforeDeleteModal(false)}>
+                <div className={styles.modalContainer}>
+                  <span className={styles.paragraphe}>Etes vous sur de vouloir supprimer ce client ?</span>
+                  <div className={styles.buttonsConfirmation}>
+                  <button
+                    className={styles.button + " " + styles.deleteAccount}
+                    onClick={() => SupprimClient()}
+                  >
+                    Oui
+                  </button>
+                  <button
+                    className={styles.button + " " + styles.right}
+                    onClick={() => setHandleBeforeDeleteModal(false)}
+                  >
+                    Non
+                  </button>
+                  </div>
+                </div>
+              </Modal>
     </>
   );
 }

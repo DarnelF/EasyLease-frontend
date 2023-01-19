@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import React, { useEffect, useState } from "react";
 import style from "../styles/NewClient.module.css";
 import Navbar from "./Navbar";
@@ -6,9 +7,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { Modal } from "antd";
 import Header from "./Header";
+const { checkBodyFront } = require("../modules/checkBody");
 
 function NewClient() {
   // Définir l'état local pour les champs de formulaire
+  let BACKEND_ADDRESS = "https://easylease-backend.vercel.app";
 
   const user = useSelector((state) => state.user.value);
   const [name, setName] = useState("");
@@ -31,7 +34,7 @@ function NewClient() {
 
   const modalContent = interlocutors.map((e, i) => {
     return (
-      <div id={e} className={style.modalInterlocutorContainer}>
+      <div key={i} id={e} className={style.modalInterlocutorContainer}>
         <ul>
           <li>
             {e.firstname} {e.name} {e.poste}
@@ -63,7 +66,23 @@ function NewClient() {
     );
   });
 
+  const [CheckBodyNonValid, setCheckBodyNonValid] = useState(false);
+
   const handleNewInterlocutorSubmit = () => {
+    if (
+      !checkBodyFront([
+        interlocFirstName,
+        interlocName,
+        interlocMail,
+        phoneNumber,
+        interlocJob,
+      ])
+    ) {
+      setCheckBodyNonValid(true);
+      return;
+    } else {
+      setCheckBodyNonValid(false);
+    }
     setInterlocutors((interlocutor) => [
       ...interlocutor,
       {
@@ -84,7 +103,7 @@ function NewClient() {
 
   const handleNewClientSubmit = () => {
     if (interlocutors.length > 0) {
-      fetch("http://localhost:3000/client/uploadClient", {
+      fetch(`${BACKEND_ADDRESS}/client/uploadClient`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,14 +116,9 @@ function NewClient() {
           clientBirth: Date.now(),
         }),
       })
-        .then((response) => {
-          console.log(response);
-          if (!response.ok) {
-            console.log("Error fetching data");
-          }
-          return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
+          console.log("TRUE, DATAS FROM CREATION CLIENT", data);
           if (data.result) {
             console.log("Client bien ajouté");
             setName("");
@@ -112,6 +126,9 @@ function NewClient() {
             setNumberofEmployees(0);
             setChiffreAffaire("");
             setNewClientAdded(true);
+            setInterlocutors([]);
+          } else if (!data.result) {
+            console.log("ERREUR", data);
           }
         })
         .catch((error) => {
@@ -129,7 +146,7 @@ function NewClient() {
   return (
     <div className={style.maincontainer}>
       <Navbar />
-      <Header name="New Client" />
+      <Header name="Nouveau Client" />
       <div className={style.container}>
         <div className={style.form}>
           <div className={style.newClientContainer}>
@@ -142,7 +159,7 @@ function NewClient() {
                 onChange={(e) => setName(e.target.value)}
                 value={name}
               ></input>
-              <label>Address</label>
+              <label>Adresse</label>
               <input
                 className={style.input + " " + style.inputNewClient}
                 placeholder="Address"
@@ -200,7 +217,7 @@ function NewClient() {
                 <div className={style.modal}>
                   <Modal closable={false} footer={null} open={newClientAdded}>
                     <div className={style.modalContainer}>
-                      <span>Nouveau client ajouté !</span>
+                      <span>✅ Nouveau client ajouté ! ✅</span>
                       <button
                         className={style.button}
                         onClick={() => setNewClientAdded(false)}
@@ -257,13 +274,18 @@ function NewClient() {
             >
               Ajout Interlocuteur
             </button>
+            {CheckBodyNonValid && (
+              <p style={{ fontSize: 16, color: "red", margin: 10 }}>
+                Champs vides ou manquants !
+              </p>
+            )}
           </div>
 
           <div className={style.buttonNewClientContainer}></div>
           {alertInterlocutor && (
             <span className={style.alert}>
               {" "}
-              Ajoutez d'abord un interlocuteur !
+              ❌ Ajoutez d'abord un interlocuteur ! ❌
             </span>
           )}
         </div>
@@ -272,7 +294,7 @@ function NewClient() {
             className={style.button}
             onClick={() => handleNewClientSubmit()}
           >
-            Création du client
+            Création du client !
           </button>
         </div>
       </div>

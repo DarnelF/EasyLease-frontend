@@ -11,6 +11,7 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import { useRouter } from "next/router";
 
 function AllScenario() {
+  const BACKEND_ADDRESS = "https://easylease-backend.vercel.app";
   const router = useRouter();
   const dispatch = useDispatch();
   const [inputValue, setInputValue] = useState("");
@@ -23,7 +24,7 @@ function AllScenario() {
   };
 
   useEffect(() => {
-    fetch(`http://localhost:3000/scenary/token/${user.token}`)
+    fetch(`${BACKEND_ADDRESS}/scenary/token/${user.token}`)
       .then((response) => response.json())
       .then((data) => {
         if (data.result) {
@@ -52,7 +53,7 @@ function AllScenario() {
       {/* {/* navbar et header /} */}
       <div className={style.main}>
         <Navbar styleScenario={{ backgroundColor: "#2A9C90" }} />
-        <Header name="Scenarios" />
+        <Header name="Scénarios" />
         <div className={style.container}>
           {/* {/ mon input de recherche /} */}
           <div className={style.search}>
@@ -69,7 +70,7 @@ function AllScenario() {
               className={style.nouveauContrat}
               onClick={() => afficheNewScenarioPage()}
             >
-              Nouveau scenario
+              Nouveau scénario
             </button>
           </div>
           {/* {/ div qui contiendra tout mes coponents contrat Card /} */}
