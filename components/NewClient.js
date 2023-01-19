@@ -268,12 +268,12 @@ function NewClient() {
           )}
         </div>
         <div className={style.containerBtn}>
-        <button
-          className={style.button}
-          onClick={() => handleNewClientSubmit()}
-        >
-          Création du client
-        </button>
+          <button
+            className={style.button}
+            onClick={() => handleNewClientSubmit()}
+          >
+            Création du client
+          </button>
         </div>
       </div>
     </div>
